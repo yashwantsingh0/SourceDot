@@ -1,0 +1,46 @@
+update() {
+  clear
+  echo -e "\e[38;5;51m"
+  echo "╔════════════════════════════════════════════════════════════════════════════╗"
+  echo "║                   🔥  SYSTEM UPGRADE INITIATED  🔥                         ║"
+  echo "╚════════════════════════════════════════════════════════════════════════════╝"
+  echo -e "\e[90m🕒 Started at: $(date)\e[0m"
+  echo -e "\e[0m"
+
+  sleep 1
+
+  # Ask for sudo access once
+  sudo -v
+
+  echo -e "\e[1;36m[1/6] 🔄 Updating system package lists (apt)...\e[0m"
+  sudo apt update
+
+  echo -e "\n\e[1;36m[2/6] ⬆️ Upgrading system packages...\e[0m"
+  sudo apt full-upgrade -y
+
+  echo -e "\n\e[1/36m[3/6] 🧹 Checking for and removing orphaned packages...\e[0m"
+  sudo apt autoremove -y
+  sudo apt autoclean -y
+
+  echo -e "\n\e[1;36m[4/6] 📦 Refreshing Snap Packages...\e[0m"
+  if command -v snap &>/dev/null; then
+    snap refresh
+  else
+    echo -e "\e[90m(Snap not installed — skipping)\e[0m"
+  fi
+
+  echo -e "\n\e[1;36m[5/6] 📦 Updating Flatpak Packages...\e[0m"
+  if command -v flatpak &>/dev/null; then
+    flatpak update -y
+  else
+    echo -e "\e[90m(Flatpak not installed — skipping)\e[0m"
+  fi
+
+  echo -e "\n\e[1;36m[6/6] ✅ Final Status Check...\e[0m"
+  echo -e "\e[38;5;82m"
+  echo "╔════════════════════════════════════════════════════════════════════════════╗"
+  echo "║           ✅  SYSTEM STATUS: ABSOLUTE PERFECTION ACHIEVED                  ║"
+  echo "╚════════════════════════════════════════════════════════════════════════════╝"
+  echo -e "\e[0m"
+  echo -e "\e[90m💡 All Done Lord Vader. The Death Star is clean and updated.\e[0m"
+}
