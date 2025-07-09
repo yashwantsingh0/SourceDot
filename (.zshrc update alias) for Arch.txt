@@ -1,0 +1,64 @@
+update() {
+  clear
+  echo -e "\e[38;5;51m"
+  echo "╔════════════════════════════════════════════════════════════════════════════╗"
+  echo "║                   🔥  SYSTEM UPGRADE INITIATED  🔥                         ║"
+  echo "╚════════════════════════════════════════════════════════════════════════════╝"
+  echo -e "\e[90m🕒 Started at: $(date)\e[0m"
+  echo -e "\e[0m"
+
+  sleep 1
+
+  # Ask for sudo access once
+  sudo -v
+
+  echo -e "\e[1;36m[1/7] 🔄 Updating system packages (pacman)...\e[0m"
+  sudo pacman -Syyu
+
+  echo -e "\n\e[1;36m[2/7] 🧩 Updating AUR packages (yay)...\e[0m"
+  if ! yay -Sua --noconfirm; then
+    echo -e "\e[1;31m[X] AUR update failed — skipping.\e[0m"
+  fi
+
+  echo -e "\n\e[1;36m[3/7] 🧹 Checking for Orphaned Packages...\e[0m"
+  orphans=$(pacman -Qtdq 2>/dev/null)
+  if [[ -n "$orphans" ]]; then
+    echo -e "\e[1;31m[-] Removing Orphans:\e[0m"
+    echo "$orphans"
+    for pkg in $orphans; do
+      if pacman -Q "$pkg" &>/dev/null; then
+        sudo pacman -Rns "$pkg"
+      else
+        echo -e "\e[90m(Already removed or invalid orphan: $pkg — skipping)\e[0m"
+      fi
+    done
+  else
+    echo -e "\e[1;32m[✓] No orphan packages found.\e[0m"
+  fi
+
+  echo -e "\n\e[1;36m[4/7] 🧼 Cleaning Package Cache...\e[0m"
+  sudo paccache -r
+
+  echo -e "\n\e[1;36m[5/7] 📦 Refreshing Snap Packages...\e[0m"
+  if command -v snap &>/dev/null; then
+    snap refresh
+  else
+    echo -e "\e[90m(Snap not installed — skipping)\e[0m"
+  fi
+
+  echo -e "\n\e[1;36m[6/7] 📦 Updating Flatpak Packages...\e[0m"
+  if command -v flatpak &>/dev/null; then
+    flatpak update -y
+  else
+    echo -e "\e[90m(Flatpak not installed — skipping)\e[0m"
+  fi
+
+  echo -e "\n\e[1;36m[7/7] ✅ Final Status Check...\e[0m"
+  echo -e "\e[38;5;82m"
+  echo "╔════════════════════════════════════════════════════════════════════════════╗"
+  echo "║           ✅  SYSTEM STATUS: ABSOLUTE PERFECTION ACHIEVED                  ║"
+  echo "╚════════════════════════════════════════════════════════════════════════════╝"
+  echo -e "\e[0m"
+  echo -e "\e[90m💡 All Done Lord Vader. The Death Star is clean and updated.\e[0m"
+}
+
